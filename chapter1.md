@@ -14,8 +14,7 @@ _**原文地址：**_[_**https://github.com/petkaantonov/bluebird/wiki/Optimizat
 
 举个例子, 使用通用编译器,`a + b`会变成这个样子:
 
-```markdown
-```nasm
+```
 mov eax, a
 mov ebx, b
 call RuntimeAdd
@@ -23,8 +22,7 @@ call RuntimeAdd
 
 换言之它仅仅是调用了运行时的函数. 如果a和b是整数（常量？）, 那可以像这样:
 
-```markdown
-```nasm
+```
 mov eax, a
 mov ebx, b
 add eax, ebx
