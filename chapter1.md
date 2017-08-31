@@ -21,67 +21,98 @@ mov ebx, b
 call RuntimeAdd
 ```
 
-    换言之它仅仅是调用了运行时的函数. 如果a和b是整数（常量？）, 那可以像这样:
+换言之它仅仅是调用了运行时的函数. 如果a和b是整数（常量？）, 那可以像这样:
 
-    ```markdown
-    ```nasm
-    mov eax, a
-    mov ebx, b
-    add eax, ebx
+```markdown
+```nasm
+mov eax, a
+mov ebx, b
+add eax, ebx
+```
 
-    （应该是指常量折叠吧，可以看看[这篇文章](/这篇文章 "https://zhuanlan.zhihu.com/p/25067384")）
+（应该是指常量折叠吧，可以看看\[这篇文章\]\(/这篇文章 "https://zhuanlan.zhihu.com/p/25067384"\)）
 
-    通常来说, 通用编译器得到的是第一种结果, 而优化编译器则会得到第二种结果. 使用优化编译器编译的代码可以很容易比通用编译器编译的代码快上 100 倍. 但这里有个坑, 并非所有的 JavaScript 代码都能被优化. 在 JavaScript 中有很多种写法, 包括具备语义的, 都不能被优化编译器编译 \(回落到通用编译器[^1]\).
 
-    记下一些会导致整个函数无法使用优化编译器的用法很重要. 一次代码优化的是一整个函数, 优化过程中并不会关心其他代码做了什么 \(除非代码在已经被优化的函数中\).
 
-    这个指南会涵盖多数会导致整个函数掉进 “反优化火狱” 的例子. 由于编译器一直在不断更新, 未来当它能够识别下面的一些情况时, 这里提到的处理方法可能也就不必要了.
+通常来说, 通用编译器得到的是第一种结果, 而优化编译器则会得到第二种结果. 使用优化编译器编译的代码可以很容易比通用编译器编译的代码快上 100 倍. 但这里有个坑, 并非所有的 JavaScript 代码都能被优化. 在 JavaScript 中有很多种写法, 包括具备语义的, 都不能被优化编译器编译 \(回落到通用编译器[^1]\).
 
-    ## 目录
 
-    * ### [工具](#工具)
-    * ### [不支持的语法](#不支持的语法)
-    * ### [argumens管理](#argumens管理)
-    * ### [switch case](#switch-case)
-    * ### [for in](#for-in)
-    * ### [具有深度逻辑或不清晰退出条件的死循环](#具有深度逻辑或不清晰退出条件的死循环)
 
-    ## 工具
+记下一些会导致整个函数无法使用优化编译器的用法很重要. 一次代码优化的是一整个函数, 优化过程中并不会关心其他代码做了什么 \\(除非代码在已经被优化的函数中\\).
 
-    你可以通过添加一些 V8 标记来使用 Node.js 验证不同的用法如何影响优化结果. 通常可以写一个包含了特定用法的函数, 使用所有可能的参数类型去调用它, 再使用 V8 的内部函数去优化和审查：
 
-    test.js:
 
-    ```js
-    //Function that contains the pattern to be inspected (using an `eval` statement)
-    function exampleFunction() {
-        return 3;
-        eval('');
+这个指南会涵盖多数会导致整个函数掉进 “反优化火狱” 的例子. 由于编译器一直在不断更新, 未来当它能够识别下面的一些情况时, 这里提到的处理方法可能也就不必要了.
+
+
+
+\#\# 目录
+
+
+
+\* \#\#\# \[工具\]\(\#工具\)
+
+\* \#\#\# \[不支持的语法\]\(\#不支持的语法\)
+
+\* \#\#\# \[argumens管理\]\(\#argumens管理\)
+
+\* \#\#\# \[switch case\]\(\#switch-case\)
+
+\* \#\#\# \[for in\]\(\#for-in\)
+
+\* \#\#\# \[具有深度逻辑或不清晰退出条件的死循环\]\(\#具有深度逻辑或不清晰退出条件的死循环\)
+
+
+
+\#\# 工具
+
+
+
+你可以通过添加一些 V8 标记来使用 Node.js 验证不同的用法如何影响优化结果. 通常可以写一个包含了特定用法的函数, 使用所有可能的参数类型去调用它, 再使用 V8 的内部函数去优化和审查：
+
+
+
+test.js:
+
+
+
+
+
+
+
+
+
+```js
+//Function that contains the pattern to be inspected (using an `eval` statement)
+function exampleFunction() {
+    return 3;
+    eval('');
+}
+
+function printStatus(fn) {
+    switch(%GetOptimizationStatus(fn)) {
+        case 1: console.log("Function is optimized"); break;
+        case 2: console.log("Function is not optimized"); break;
+        case 3: console.log("Function is always optimized"); break;
+        case 4: console.log("Function is never optimized"); break;
+        case 6: console.log("Function is maybe deoptimized"); break;
+        case 7: console.log("Function is optimized by TurboFan"); break;
+        default: console.log("Unknown optimization status"); break;
     }
+}
 
-    function printStatus(fn) {
-        switch(%GetOptimizationStatus(fn)) {
-            case 1: console.log("Function is optimized"); break;
-            case 2: console.log("Function is not optimized"); break;
-            case 3: console.log("Function is always optimized"); break;
-            case 4: console.log("Function is never optimized"); break;
-            case 6: console.log("Function is maybe deoptimized"); break;
-            case 7: console.log("Function is optimized by TurboFan"); break;
-            default: console.log("Unknown optimization status"); break;
-        }
-    }
+//Fill type-info
+exampleFunction();
+// 2 calls are needed to go from uninitialized -> pre-monomorphic -> monomorphic
+exampleFunction();
 
-    //Fill type-info
-    exampleFunction();
-    // 2 calls are needed to go from uninitialized -> pre-monomorphic -> monomorphic
-    exampleFunction();
+%OptimizeFunctionOnNextCall(exampleFunction);
+//The next call
+exampleFunction();
 
-    %OptimizeFunctionOnNextCall(exampleFunction);
-    //The next call
-    exampleFunction();
-
-    //Check
-    printStatus(exampleFunction);
+//Check
+printStatus(exampleFunction);
+```
 
 运行一下：
 
@@ -436,7 +467,7 @@ function inheritedKeys(obj) {
 
 将循环的退出条件重构到循环自己的条件部分可能并不容易. 如果代码的退出条件是结尾 if 语句的一部分, 并且代码至少会执行一次, 那可以重构为`do { } while ();`循环. 如果退出条件在循环开头, 把它放进循环本身的条件部分. 如果退出条件在中间, 你可以尝试 “滚动” 代码: 每每从开头移动一部分代码到末尾,也可以复制一份到循环开始之前. 一旦退出条件可以放置在循环的条件部分, 或者至少是一个比较浅的逻辑判断, 这个循环应该就不会被反优化了.
 
-[^1]: "bails out"
+[^1]: bail out
 
 [^2]: deoptimization
 
