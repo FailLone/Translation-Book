@@ -20,79 +20,75 @@ mov eax, a
 mov ebx, b
 call RuntimeAdd
 ```
-```
 
-换言之它仅仅是调用了运行时的函数. 如果a和b是整数（常量？）, 那可以像这样:
+    换言之它仅仅是调用了运行时的函数. 如果a和b是整数（常量？）, 那可以像这样:
 
-```markdown
-```nasm
-mov eax, a
-mov ebx, b
-add eax, ebx
-```
-```
+    ```markdown
+    ```nasm
+    mov eax, a
+    mov ebx, b
+    add eax, ebx
 
-（应该是指常量折叠吧，可以看看[这篇文章](/这篇文章 "https://zhuanlan.zhihu.com/p/25067384")）
+    （应该是指常量折叠吧，可以看看[这篇文章](/这篇文章 "https://zhuanlan.zhihu.com/p/25067384")）
 
-通常来说, 通用编译器得到的是第一种结果, 而优化编译器则会得到第二种结果. 使用优化编译器编译的代码可以很容易比通用编译器编译的代码快上 100 倍. 但这里有个坑, 并非所有的 JavaScript 代码都能被优化. 在 JavaScript 中有很多种写法, 包括具备语义的, 都不能被优化编译器编译 \(回落到通用编译器[^1]\).
+    通常来说, 通用编译器得到的是第一种结果, 而优化编译器则会得到第二种结果. 使用优化编译器编译的代码可以很容易比通用编译器编译的代码快上 100 倍. 但这里有个坑, 并非所有的 JavaScript 代码都能被优化. 在 JavaScript 中有很多种写法, 包括具备语义的, 都不能被优化编译器编译 \(回落到通用编译器[^1]\).
 
-记下一些会导致整个函数无法使用优化编译器的用法很重要. 一次代码优化的是一整个函数, 优化过程中并不会关心其他代码做了什么 \(除非代码在已经被优化的函数中\).
+    记下一些会导致整个函数无法使用优化编译器的用法很重要. 一次代码优化的是一整个函数, 优化过程中并不会关心其他代码做了什么 \(除非代码在已经被优化的函数中\).
 
-这个指南会涵盖多数会导致整个函数掉进 “反优化火狱” 的例子. 由于编译器一直在不断更新, 未来当它能够识别下面的一些情况时, 这里提到的处理方法可能也就不必要了.
+    这个指南会涵盖多数会导致整个函数掉进 “反优化火狱” 的例子. 由于编译器一直在不断更新, 未来当它能够识别下面的一些情况时, 这里提到的处理方法可能也就不必要了.
 
-## 目录
+    ## 目录
 
-* ### [工具](#工具)
-* ### [不支持的语法](#不支持的语法)
-* ### [argumens管理](#argumens管理)
-* ### [switch case](#switch-case)
-* ### [for in](#for-in)
-* ### [具有深度逻辑或不清晰退出条件的死循环](#具有深度逻辑或不清晰退出条件的死循环)
+    * ### [工具](#工具)
+    * ### [不支持的语法](#不支持的语法)
+    * ### [argumens管理](#argumens管理)
+    * ### [switch case](#switch-case)
+    * ### [for in](#for-in)
+    * ### [具有深度逻辑或不清晰退出条件的死循环](#具有深度逻辑或不清晰退出条件的死循环)
 
-## 工具
+    ## 工具
 
-你可以通过添加一些 V8 标记来使用 Node.js 验证不同的用法如何影响优化结果. 通常可以写一个包含了特定用法的函数, 使用所有可能的参数类型去调用它, 再使用 V8 的内部函数去优化和审查：
+    你可以通过添加一些 V8 标记来使用 Node.js 验证不同的用法如何影响优化结果. 通常可以写一个包含了特定用法的函数, 使用所有可能的参数类型去调用它, 再使用 V8 的内部函数去优化和审查：
 
-test.js:
+    test.js:
 
-```js
-//Function that contains the pattern to be inspected (using an `eval` statement)
-function exampleFunction() {
-    return 3;
-    eval('');
-}
-
-function printStatus(fn) {
-    switch(%GetOptimizationStatus(fn)) {
-        case 1: console.log("Function is optimized"); break;
-        case 2: console.log("Function is not optimized"); break;
-        case 3: console.log("Function is always optimized"); break;
-        case 4: console.log("Function is never optimized"); break;
-        case 6: console.log("Function is maybe deoptimized"); break;
-        case 7: console.log("Function is optimized by TurboFan"); break;
-        default: console.log("Unknown optimization status"); break;
+    ```js
+    //Function that contains the pattern to be inspected (using an `eval` statement)
+    function exampleFunction() {
+        return 3;
+        eval('');
     }
-}
 
-//Fill type-info
-exampleFunction();
-// 2 calls are needed to go from uninitialized -> pre-monomorphic -> monomorphic
-exampleFunction();
+    function printStatus(fn) {
+        switch(%GetOptimizationStatus(fn)) {
+            case 1: console.log("Function is optimized"); break;
+            case 2: console.log("Function is not optimized"); break;
+            case 3: console.log("Function is always optimized"); break;
+            case 4: console.log("Function is never optimized"); break;
+            case 6: console.log("Function is maybe deoptimized"); break;
+            case 7: console.log("Function is optimized by TurboFan"); break;
+            default: console.log("Unknown optimization status"); break;
+        }
+    }
 
-%OptimizeFunctionOnNextCall(exampleFunction);
-//The next call
-exampleFunction();
+    //Fill type-info
+    exampleFunction();
+    // 2 calls are needed to go from uninitialized -> pre-monomorphic -> monomorphic
+    exampleFunction();
 
-//Check
-printStatus(exampleFunction);
-```
+    %OptimizeFunctionOnNextCall(exampleFunction);
+    //The next call
+    exampleFunction();
+
+    //Check
+    printStatus(exampleFunction);
 
 运行一下：
 
 ```
 $ node --trace_opt --trace_deopt --allow-natives-syntax test.js
 (v0.12.7) Function is not optimized
-(v4.0.0) Function is optimized by TurboFan 
+(v4.0.0) Function is optimized by TurboFan
 ```
 
 [TurboFan](/TurboFan "https://codereview.chromium.org/1962103003")
@@ -119,14 +115,13 @@ Function is optimized
 if (DEVELOPMENT) {
     debugger;
 }
-
 ```
 
 上面的代码会导致包含它的整个函数不被优化, 即使从来不会执行到 debugger 语句.
 
 目前不会被优化的有:
 
-* 包含含有` __proto__ `或者` get/set `声明的对象字面量的函数
+* 包含含有`__proto__`或者`get/set`声明的对象字面量的函数
 
 即，如果有以下情况，整个函数将无法被优化：
 
@@ -339,7 +334,6 @@ function over128Cases(c) {
         case 129: break;
     }
 }
-
 ```
 
 所以请保证 switch 语句的 case 从句不超过 128 个, 可以使用函数数组或者 if…else 代替.
