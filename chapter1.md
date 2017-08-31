@@ -40,7 +40,7 @@ add eax, ebx
 
 ## 目录
 
-* ### 工具
+* ### [工具](#工具 "工具")
 * ### [不支持的语法](#不支持的语法 "不支持的语法")
 * ### [argumens管理](#argumens管理 "argumens管理")
 * ### [switch case](#switch-case "switch case")
