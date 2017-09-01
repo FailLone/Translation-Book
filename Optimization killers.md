@@ -14,7 +14,7 @@ _**原文地址：**_[_**https://github.com/petkaantonov/bluebird/wiki/Optimizat
 
 举个例子, 使用通用编译器,`a + b`会变成这个样子:
 
-```
+```nasm
 mov eax, a
 mov ebx, b
 call RuntimeAdd
@@ -22,7 +22,7 @@ call RuntimeAdd
 
 换言之它仅仅是调用了运行时的函数. 如果a和b是整数（常量？）, 那可以像这样:
 
-```
+```nasm
 mov eax, a
 mov ebx, b
 add eax, ebx
@@ -38,12 +38,12 @@ add eax, ebx
 
 ## 目录
 
-* ### [工具](#工具 "工具")
-* ### [不支持的语法](#不支持的语法 "不支持的语法")
-* ### [argumens管理](#argumens管理 "argumens管理")
-* ### [switch case](#switch-case "switch case")
-* ### [for in](#for-in "for in")
-* ### [具有深度逻辑或不清晰退出条件的死循环](#具有深度逻辑或不清晰退出条件的死循环 "具有深度逻辑或不清晰退出条件的死循环")
+* ### [工具](##工具 "工具")
+* ### [不支持的语法](##不支持的语法 "不支持的语法")
+* ### [argumens管理](##argumens管理 "argumens管理")
+* ### [switch case](##switch-case "switch case")
+* ### [for in](##for-in "for in")
+* ### [具有深度逻辑或不清晰退出条件的死循环](##具有深度逻辑或不清晰退出条件的死循环 "具有深度逻辑或不清晰退出条件的死循环")
 
 ## 工具
 
