@@ -38,14 +38,14 @@ add eax, ebx
 
 ## 目录
 
-* ### [工具](#user-content-工具)
-* ### [不支持的语法](#user-content-不支持的语法)
-* ### [argumens管理](#user-content-argumens管理)
-* ### [switch case](#user-content-switch-case)
-* ### [for in](#user-content-for-in)
-* ### [具有深度逻辑或不清晰退出条件的死循环](#user-content-具有深度逻辑或不清晰退出条件的死循环)
+* ### [工具](#user-content-1)
+* ### [不支持的语法](#user-content-2)
+* ### [argumens管理](#user-content-3)
+* ### [switch case](#user-content-4)
+* ### [for in](#user-content-5)
+* ### [具有深度逻辑或不清晰退出条件的死循环](#user-content-6)
 
-<h2 id='工具'>工具</h2>
+<h2 id='1'>工具</h2>
 
 你可以通过添加一些 V8 标记来使用 Node.js 验证不同的用法如何影响优化结果. 通常可以写一个包含了特定用法的函数, 使用所有可能的参数类型去调用它, 再使用 V8 的内部函数去优化和审查：
 
@@ -103,7 +103,7 @@ Function is optimized
 
 学会使用这个工具是非常重要和必要的，不然你怎么去验证？
 
-<h2 id='不支持的语法'>不支持的语法</h2>
+<h2 id='2'>不支持的语法</h2>
 
 优化编译器不支持一些特定的语句, 使用这些语法会使包含它的函数无法得到优化.
 
@@ -185,7 +185,7 @@ if(result === errorObject) {
 
 try catch 现在已经可以优化了，但这个攻略依然还是有意义的，而且浏览器不一定支持了新版本的V8
 
-<h2 id='argumens管理'>argumens管理</h2>
+<h2 id='3'>argumens管理</h2>
 
 有不少使用`arguments`的方式会导致相关函数无法被优化. 所以在使用`arguments`的时候需要非常留意.
 
@@ -319,7 +319,7 @@ function assignToArguments() {
 
 只要你用以上方法去操作arguments，就可以放心大胆地使用arguments了
 
-<h2 id='switch case'>switch case</h2>
+<h2 id='4'>switch case</h2>
 
 一个 switch…case 语句目前可以有最多 128 个 case 从句, 如果超过了这个数量, 包含这个 switch 语句的函数就无法被优化.
 
@@ -338,7 +338,7 @@ function over128Cases(c) {
 
 所以请保证 switch 语句的 case 从句不超过 128 个, 可以使用函数数组或者 if…else 代替.
 
-<h2 id='for in'>for in</h2>
+<h2 id='5'>for in</h2>
 
 for…in 语句在一些情况下可能导致包含它的函数无法被优化.
 
@@ -430,7 +430,7 @@ function inheritedKeys(obj) {
 }
 ```
 
-<h2 id='具有深度逻辑或不清晰退出条件的死循环'>具有深度逻辑或不清晰退出条件的死循环</h2>
+<h2 id='6'>具有深度逻辑或不清晰退出条件的死循环</h2>
 
 写代码的时候, 有时会知道自己需要一个循环, 但不清楚循环内的代码会写成什么样子. 所以你放了一个`while (true) {`或者`for (;;) {`, 之后再在一定条件下中断循环接续之后的代码, 最后忘了这么一件事. 重构的时间到了, 你发现这个函数很慢, 或者发现一个反优化[^2]的情况 – 可能它就是罪魁.
 
