@@ -6,7 +6,7 @@ _**原文地址：**_[_**https://github.com/petkaantonov/bluebird/wiki/Optimizat
 
 这篇文档包含了如何避免使代码性能远低于预期的建议. 尤其是一些会导致 V8 \(牵涉到 Node.js, Opera, Chromium 等\) 无法优化相关函数的问题.
 
-[vhf](/vhf "https://github.com/vhf")\(nodejs 作者\)也有一个类似的项目，尝试去列举出所有v8 Crankshaft引擎的杀手们：[V8 Bailout Reasons](/V8 Bailout Reasons "https://github.com/vhf/v8-bailout-reasons")
+[vhf](https://github.com/vhf)\(nodejs 作者\)也有一个类似的项目，尝试去列举出所有v8 Crankshaft引擎的杀手们：[V8 Bailout Reasons](https://github.com/vhf/v8-bailout-reasons)
 
 ### V8背景知识
 
@@ -28,7 +28,7 @@ mov ebx, b
 add eax, ebx
 ```
 
-（应该是指常量折叠吧，可以看看[这篇文章](/这篇文章 "https://zhuanlan.zhihu.com/p/25067384&quot;\)）\]\(https://zhuanlan.zhihu.com/p/25067384&quot;")\)
+\（应该是指常量折叠吧，可以看看[这篇文章](https://zhuanlan.zhihu.com/p/25067384)\)
 
 通常来说, 通用编译器得到的是第一种结果, 而优化编译器则会得到第二种结果. 使用优化编译器编译的代码可以很容易比通用编译器编译的代码快上 100 倍. 但这里有个坑, 并非所有的 JavaScript 代码都能被优化. 在 JavaScript 中有很多种写法, 包括具备语义的, 都不能被优化编译器编译 \(回落到通用编译器[^1]\).
 
@@ -38,7 +38,7 @@ add eax, ebx
 
 ## 目录
 
-* ### [工具](/工具 #工具)
+* ### [工具](#工-具)
 * ### [不支持的语法](#不支持的语法)
 * ### [argumens管理](#argumens管理)
 * ### [switch case](#switch-case)
