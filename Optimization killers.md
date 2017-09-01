@@ -6,7 +6,7 @@ _**原文地址：**_[_**https://github.com/petkaantonov/bluebird/wiki/Optimizat
 
 这篇文档包含了如何避免使代码性能远低于预期的建议. 尤其是一些会导致 V8 \(牵涉到 Node.js, Opera, Chromium 等\) 无法优化相关函数的问题.
 
-[vhf](/vhf "https://github.com/vhf")\(nodejs 作者\)也有一个类似的项目，尝试去列举出所有v8 Crankshaft引擎的杀手们：[V8 Bailout Reasons]("https://github.com/vhf/v8-bailout-reasons")
+[vhf](/vhf "https://github.com/vhf")\(nodejs 作者\)也有一个类似的项目，尝试去列举出所有v8 Crankshaft引擎的杀手们：[V8 Bailout Reasons](/V8 Bailout Reasons "https://github.com/vhf/v8-bailout-reasons")
 
 ### V8背景知识
 
@@ -38,7 +38,7 @@ add eax, ebx
 
 ## 目录
 
-* ### [工具](#工具)
+* ### [工具](/工具 #工具)
 * ### [不支持的语法](#不支持的语法)
 * ### [argumens管理](#argumens管理)
 * ### [switch case](#switch-case)
