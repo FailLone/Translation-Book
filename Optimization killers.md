@@ -246,7 +246,7 @@ function leaksArguments3() {
 
 **攻略**是拷贝到一个数组里面再泄漏出来
 
-```
+```js
 function doesntLeakArguments() {
                     // .length 只是一个整数, 它不会泄露
                     // arguments 对象本身
@@ -272,7 +272,7 @@ function anotherNotLeakingExample() {
 
 然而如果你有一个 build 步骤, 这其实可以用一个不需要 source map 的宏来实现, 同时保证源代码是有效的 JavaScript 代码.、
 
-```
+```js
 function doesntLeakArguments() {
     INLINE_SLICE(args, arguments);
     return args;
@@ -281,7 +281,7 @@ function doesntLeakArguments() {
 
 上面的技巧就用到了 Bluebird 中, 在 build 后会被扩充为下面这样:
 
-```
+```js
 function doesntLeakArguments() {
     var $_len = arguments.length;
     var args = new Array($_len); 
@@ -296,7 +296,7 @@ function doesntLeakArguments() {
 
 在非严格模式下, 这其实是可能的:
 
-```
+```js
 function assignToArguments() {
     arguments = 3;
     return arguments;
@@ -436,6 +436,5 @@ function inheritedKeys(obj) {
 
 将循环的退出条件重构到循环自己的条件部分可能并不容易. 如果代码的退出条件是结尾 if 语句的一部分, 并且代码至少会执行一次, 那可以重构为`do { } while ();`循环. 如果退出条件在循环开头, 把它放进循环本身的条件部分. 如果退出条件在中间, 你可以尝试 “滚动” 代码: 每每从开头移动一部分代码到末尾,也可以复制一份到循环开始之前. 一旦退出条件可以放置在循环的条件部分, 或者至少是一个比较浅的逻辑判断, 这个循环应该就不会被反优化了.
 
-[1: bail out](#sup1)
-[2: 原文是 deoptimization](#sup2)
+[1: bail out](#user-content-sup1)  [2: deoptimization](#user-content-sup2)
 
