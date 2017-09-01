@@ -38,12 +38,12 @@ add eax, ebx
 
 ## 目录
 
-* ### [工具](#工具)
-* ### [不支持的语法](#不支持的语法)
-* ### [argumens管理](#argumens管理)
-* ### [switch case](#switch-case)
-* ### [for in](#for-in)
-* ### [具有深度逻辑或不清晰退出条件的死循环](#具有深度逻辑或不清晰退出条件的死循环)
+* ### [工具](#user-content-工具)
+* ### [不支持的语法](#user-content-不支持的语法)
+* ### [argumens管理](#user-content-argumens管理)
+* ### [switch case](#user-content-switch-case)
+* ### [for in](#user-content-for-in)
+* ### [具有深度逻辑或不清晰退出条件的死循环](#user-content-具有深度逻辑或不清晰退出条件的死循环)
 
 <h2 id='工具'>工具</h2>
 
@@ -437,4 +437,5 @@ function inheritedKeys(obj) {
 将循环的退出条件重构到循环自己的条件部分可能并不容易. 如果代码的退出条件是结尾 if 语句的一部分, 并且代码至少会执行一次, 那可以重构为`do { } while ();`循环. 如果退出条件在循环开头, 把它放进循环本身的条件部分. 如果退出条件在中间, 你可以尝试 “滚动” 代码: 每每从开头移动一部分代码到末尾,也可以复制一份到循环开始之前. 一旦退出条件可以放置在循环的条件部分, 或者至少是一个比较浅的逻辑判断, 这个循环应该就不会被反优化了.
 
 [^1]: bail out
+[^2]：deoptimization
 
